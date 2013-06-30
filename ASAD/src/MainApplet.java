@@ -6,9 +6,10 @@ import java.awt.*;
 import java.awt.event.*; 
 import java.util.HashMap;
 
-public class MainApplet extends Applet{
+public class MainApplet extends Applet implements ActionListener{
 	TextArea inputArea = new TextArea("Enter your Lines here!");
 	TextArea outputArea = new TextArea("");
+	private Index indxObj = new Index(); 
 	Button submitButton = new Button("Submit");
 	
 	/**
@@ -19,7 +20,7 @@ public class MainApplet extends Applet{
 	public MainApplet() {
 		add(inputArea);
 		add(submitButton);
-		submitButton.addActionListener(new MyActionListener());
+		submitButton.addActionListener(this);
 		add(outputArea);
 		outputArea.setEditable(false);
 	}
@@ -38,28 +39,22 @@ public class MainApplet extends Applet{
 			
 
 	}
-	
-	//A local class to handle events
-	class MyActionListener implements ActionListener{
-		private Index indxObj = new Index(); 
+
+	public void actionPerformed(ActionEvent event){
+		String s = inputArea.getText();
+		indxObj.setsOriginalSearchContent(s);
 		
-		public void actionPerformed(ActionEvent event){
-			String s = inputArea.getText();
-
-			indxObj.setsOriginalSearchContent(s);
+		HashMap<Integer, String> hIndx = indxObj.getAllCircularShiftLines(indxObj);
 			
-			HashMap<Integer, String> hIndx = indxObj.getAllCircularShiftLines(indxObj);
-			
-			outputArea.setText("");
-			
-			//Print all the indices and their values
-			if(hIndx != null && hIndx.size() != 0){
-				for(Integer id : hIndx.keySet() ){
-					outputArea.append(hIndx.get(id)+"\n"); 
-				}
+		outputArea.setText("");
+		
+		//Print all the indices and their values
+		if(hIndx != null && hIndx.size() != 0){
+			for(Integer id : hIndx.keySet() ){
+				outputArea.append(hIndx.get(id)+"\n"); 
 			}
-
 		}
+
 	}
 
 }
