@@ -7,7 +7,7 @@ import java.awt.event.*;
 import java.util.HashMap;
 
 public class MainApplet extends Applet{
-	TextArea inputArea = new TextArea("Enter your Lines here");
+	TextArea inputArea = new TextArea("Enter your Lines here!");
 	TextArea outputArea = new TextArea("");
 	Button submitButton = new Button("Submit");
 	
