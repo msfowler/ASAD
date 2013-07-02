@@ -44,14 +44,14 @@ public class MainApplet extends Applet implements ActionListener{
 		String s = inputArea.getText();
 		indxObj.setsOriginalSearchContent(s);
 		
-		HashMap<Integer, String> hIndx = indxObj.getAllCircularShiftLines(indxObj);
+		HashMap<Integer, Index> hIndx = indxObj.getAllCircularShiftLines(indxObj);
 			
 		outputArea.setText("");
 		
 		//Print all the indices and their values
 		if(hIndx != null && hIndx.size() != 0){
 			for(Integer id : hIndx.keySet() ){
-				outputArea.append(hIndx.get(id)+"\n"); 
+				outputArea.append(hIndx.get(id).getsCircularShiftedLine()+"\n"); 
 			}
 		}
 

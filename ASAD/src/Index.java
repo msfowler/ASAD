@@ -2,6 +2,8 @@
  * @author tejashree
  */
 
+import java.io.ObjectInputStream.GetField;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,18 +35,20 @@ public class Index {
 		this.iLineNumber = iLineNumber;
 	}
 
-	Integer iOffset;
+	Integer iwordOffset;
 	
-	public Integer getiOffset() {
-		return iOffset;
+	
+	public Integer getIwordOffset() {
+		return iwordOffset;
 	}
 
-	public void setiOffset(Integer iOffset) {
-		this.iOffset = iOffset;
+	public void setIwordOffset(Integer iwordOffset) {
+		this.iwordOffset = iwordOffset;
 	}
 
 	String SOriginalSearchLine;
-	HashMap<Integer, String> hmapListOfIndices;
+	
+	//HashMap<Integer, String> hmapListOfIndices;
 	
 
 	public String getSOriginalSearchLine() {
@@ -55,94 +59,188 @@ public class Index {
 		SOriginalSearchLine = sOriginalSearchLine;
 	}
 
-	public HashMap<Integer, String> getHmapListOfIndices() {
+	/*public HashMap<Integer, String> getHmapListOfIndices() {
 		return hmapListOfIndices;
 	}
 
 	public void setHmapListOfIndices(HashMap<Integer, String> hmapListOfIndices) {
 		this.hmapListOfIndices = hmapListOfIndices;
+	}*/
+	
+	
+	public ArrayList<Index> aCircularShiftedLines;
+	
+
+	public ArrayList<Index> getaCircularShiftedLines() {
+		return aCircularShiftedLines;
+	}
+
+	public void setaCircularShiftedLines(ArrayList<Index> aCircularShiftedLines) {
+		this.aCircularShiftedLines = aCircularShiftedLines;
+	}
+
+	public String sCircularShiftedLine;
+	
+	public String getsCircularShiftedLine() {
+		return sCircularShiftedLine;
+	}
+
+	public void setsCircularShiftedLine(String sCircularShiftedLine) {
+		this.sCircularShiftedLine = sCircularShiftedLine;
 	}
 
 	public Index() {
 		// TODO Auto-generated constructor stub
 	}
 	
-	/**
-	 * 
-	 * @author tejashree
-	 *
-	 */
-	 class ValueComparator implements Comparator<Integer> {
-       
-	    Map<Integer, String> iMap;
-	    public ValueComparator(Map<Integer, String> imap) {
-	        this.iMap = imap;
-	    }
-
-	    // Note: this comparator imposes orderings that are inconsistent with equals.    
-	    public int compare(Integer a, Integer b) {
-	        if ((iMap.get(b).compareToIgnoreCase(iMap.get(a))) >= 0) {
-	            return -1;
-	        } else {
-	            return 1;
-	        } // returning 0 would merge keys
-	    }
-	}
+	
 	
 	/**
 	 * 
 	 * @param ind
 	 * @return
 	 */
-	public HashMap<Integer, String>getAllCircularShiftLines(Index ind){
+	public HashMap<Integer, Index>getAllCircularShiftLines(Index hIndx){
 		
-		HashMap<Integer, String> hCircularShiftLines = new HashMap<Integer, String>();
-		
-
+		HashMap<Integer, Index> hOriginalLines = separateInputLines(hIndx);
 		Integer iIndx = 0;
-		if(ind != null){
-			StringTokenizer st = new StringTokenizer(ind.getsOriginalSearchContent(),".");
-			
-			while(st.hasMoreTokens()){
-				String sOrgLine = st.nextToken().toString();
-				//System.out.println("Original Line : " +sOrgLine);
-				ind.setSOriginalSearchLine(sOrgLine.trim());
-				hCircularShiftLines.put(iIndx, ind.getSOriginalSearchLine()); //Add original line 
-				
-				String sCircularShiftLine = Utility.circularShiftLine(ind.getSOriginalSearchLine());
-				iIndx++;	
-				hCircularShiftLines.put(iIndx, sCircularShiftLine); //Add first circular shift Line
-
-
-				while(!(ind.getSOriginalSearchLine().equalsIgnoreCase(sCircularShiftLine))){ //compare original line with shifted line
-					hCircularShiftLines.put(iIndx, sCircularShiftLine); //add to map before shifting
-					sCircularShiftLine = Utility.circularShiftLine(sCircularShiftLine);
-					iIndx++;
-				}
-			}
+		HashMap<Integer, Index> hCircularShiftLines = new HashMap<Integer, Index>();;
 		
+		if(hOriginalLines != null && hOriginalLines.size() != 0){
+			
+			for(Integer id : hOriginalLines.keySet() ){
+				
+				
+				HashMap<Integer, Index> indxResultMap = circularShiftLine(hOriginalLines.get(id));
+				
+				if (indxResultMap != null) {
+					//ArrayList<Index> arrList = indxResultObj.getaCircularShiftedLines();
+					
+					//for(int i= 0; i< arrList.size() ; i++) {
+					for(Integer idtest : indxResultMap.keySet() ){
+				
+						//Index idOb = (Index)arrList.get(i);
+						//System.out.println("Index-"+idOb.getiLineNumber()+" Offset-"+idOb.getIwordOffset() + "  is : "+ idOb.getsCircularShiftedLine());
+						Index idOb = indxResultMap.get(idtest);
+						//System.out.println("Index-"+idOb.getiLineNumber()+" Offset-"+idOb.getIwordOffset() + "  is : "+ idOb.getsCircularShiftedLine());
+						
+						hCircularShiftLines.put(iIndx++, idOb);
+					}
+					
+				}
+				
+				//hCircularShiftLines.putAll(indxResultMap);
+				
+			}
+			
 		}
+		
+		
+		
 		/*for (Entry<Integer, String> entry  : Utility.entriesSortedByValues(hCircularShiftLines)) {
 		    System.out.println(entry.getKey()+":"+entry.getValue());
 		}*/
 
-		ValueComparator indices =  new ValueComparator(hCircularShiftLines);
-        TreeMap<Integer,String> sorted_map = new TreeMap<Integer,String>(indices);
+		HashMap<Integer, Index> finalMap = sortAllCircularShiftedLines(hCircularShiftLines);
+		return finalMap;
+	}
+
+	/**
+	 * @param hCircularShiftLines
+	 * @return
+	 */
+	private HashMap<Integer, Index> sortAllCircularShiftedLines(
+			HashMap<Integer, Index> hCircularShiftLines) {
+		Utility.ValueComparator indices =  new Utility.ValueComparator(hCircularShiftLines);
+        TreeMap<Integer,Index> sorted_map = new TreeMap<Integer,Index>(indices);
         sorted_map.putAll(hCircularShiftLines);
         
-        HashMap<Integer, String> finalMap = new HashMap<Integer, String>();
+        HashMap<Integer, Index> finalMap = new HashMap<Integer, Index>();
         Integer iNewIndx = 0;
         if(sorted_map != null && sorted_map.size() != 0){
 			for(Integer id : sorted_map.keySet() ){
 				
 				finalMap.put(iNewIndx, hCircularShiftLines.get(id));
-				//System.out.println("Sorted Index-"+id.intValue()+" is : "+hCircularShiftLines.get(id));
+				//System.out.println("Sorted Index-"+id.intValue()+" is : "+hCircularShiftLines.get(id).getsCircularShiftedLine());
 				iNewIndx++;
 				
 			}
 			
 		}
 		return finalMap;
+	}
+
+	/**
+	 * @param ind
+	 * @return
+	 */
+	private HashMap<Integer, Index> separateInputLines(Index ind) {
+		HashMap<Integer, Index> hOriginalLines = new HashMap<Integer, Index>();
+		
+		Integer iIndx = 0;
+		Index indxObj;
+		if(ind != null){
+			StringTokenizer st = new StringTokenizer(ind.getsOriginalSearchContent(),".");
+			
+			while(st.hasMoreTokens()){
+				String sOrgLine = st.nextToken().toString();
+				indxObj = new Index();
+				indxObj.setSOriginalSearchLine(sOrgLine.trim());
+				indxObj.setiLineNumber(iIndx + 1);
+				hOriginalLines.put(iIndx, indxObj);
+				iIndx++;
+				
+			
+			}
+	
+		}
+		return hOriginalLines;
+	}
+
+	/**
+	 * @param ind
+	 * @param hCircularShiftLines
+	 * @param iIndx
+	 * @param st
+	 * @return
+	 */
+	private HashMap <Integer, Index> circularShiftLine(
+			 		Index indLineObj
+			) {
+		
+		HashMap<Integer, Index> indxMap = new HashMap<Integer, Index>();
+		Integer indx = 0;
+		if(indLineObj != null ){
+				//ArrayList<Index> arrObj = new ArrayList<Index>();
+				Integer iWordOffset = 1;
+				String sOrgLine = indLineObj.getSOriginalSearchLine();
+				Index indWordObj = new Index();
+				indWordObj.setiLineNumber(indLineObj.getiLineNumber());
+				indWordObj.setIwordOffset(iWordOffset++);
+				indWordObj.setsCircularShiftedLine(sOrgLine);
+				//arrObj.add(indWordObj);
+				indxMap.put(indx, indWordObj);
+				indx++;
+						
+				String sCircularShiftLine = Utility.circularShiftLine(sOrgLine);
+		
+				while (!(sOrgLine.equalsIgnoreCase(sCircularShiftLine))){ //compare original line with shifted line
+					
+					indWordObj = new Index();
+					indWordObj.setiLineNumber(indLineObj.getiLineNumber());
+					indWordObj.setIwordOffset(iWordOffset++);
+					indWordObj.setSOriginalSearchLine(sOrgLine);
+					indWordObj.setsCircularShiftedLine(sCircularShiftLine);
+					//arrObj.add(indWordObj);
+					indxMap.put(indx, indWordObj);
+					
+					sCircularShiftLine = Utility.circularShiftLine(sCircularShiftLine);
+					indx++;
+				}
+				//indLineObj.setaCircularShiftedLines(arrObj);	
+		}
+	
+		return indxMap;
 	}
 	
 	
@@ -156,15 +254,15 @@ public class Index {
 		Index indxObj = new Index();
 		indxObj.setsOriginalSearchContent("This is test for Web Search Engine. It would be used for keyword search.");
 		//indxObj.setSOriginalSearchLine("This is test for Web Search Engine");
-		HashMap<Integer, String> hIndx = indxObj.getAllCircularShiftLines(indxObj);
+		HashMap<Integer, Index> hIndx = indxObj.getAllCircularShiftLines(indxObj);
 		
 		//Print all the indices and their values
 		if(hIndx != null && hIndx.size() != 0){
 			for(Integer id : hIndx.keySet() ){
 				
 				//System.out.println("Index-"+id.intValue()+" is : "+hIndx.get(id));
-				System.out.println(hIndx.get(id));
-				
+				//System.out.println(hIndx.get(id).getsCircularShiftedLine());
+				System.out.println(hIndx.get(id).getsCircularShiftedLine()+"  		First : "+hIndx.get(id).getiLineNumber()+"  	Offset : "+hIndx.get(id).getIwordOffset());
 			}
 			
 		}

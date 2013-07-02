@@ -4,6 +4,7 @@
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
@@ -91,6 +92,71 @@ public class Utility {
         return sortedEntries;
     }
 	
+	
+
+	/**
+	 * Used in Index class
+	 * @author tejashree
+	 *
+	 */
+	 static class ValueComparator implements Comparator<Integer> {
+       
+	    Map<Integer, Index> iMap;
+	    public ValueComparator(Map<Integer, Index> imap) {
+	        this.iMap = imap;
+	    }
+
+	    // Note: this comparator imposes orderings that are inconsistent with equals.    
+	    public int compare(Integer a, Integer b) {
+	    	String str1 = ((Index)(iMap.get(b))).getsCircularShiftedLine();
+	    	String str2 = ((Index)iMap.get(a)).getsCircularShiftedLine();
+	    	
+	    	//System.out.println("STRING 1---------"+str1);
+	    	//System.out.println("STRING 2---------"+str2);
+	        if (str1.compareToIgnoreCase(str2) >= 0) {
+	            return -1;
+	        } else {
+	            return 1;
+	        } // returning 0 would merge keys
+	    }
+	}
+
+	
+	/**
+	 * Used in Index class
+	 * @author tejashree
+	 *
+	 */
+	 /*static class ValueComparator implements Comparator<Integer> {
+       
+	    Map<Integer, Index> iMap;
+	    public ValueComparator(Map<Integer, Index> imap) {
+	        this.iMap = imap;
+	    }
+
+	    // Note: this comparator imposes orderings that are inconsistent with equals.    
+	    public int compare(Integer a, Integer b) {
+	    	Index iFirstObj = (iMap).get(a);
+	    	Index iSecondObj = (iMap).get(b);
+	    	 
+	    	ArrayList<Index> aFirstList = iFirstObj.getaCircularShiftedLines();
+	    	ArrayList<Index> aSecondList = iSecondObj.getaCircularShiftedLines();
+	    	
+	    	if((aFirstList != null && aFirstList.size() != 0) && (aSecondList != null && aSecondList.size() !=0 ) ){
+	    	
+	    		aFirstList.addAll(aSecondList);
+	    	}
+	    	
+	    	String sOne = ((Index)aFirstList.get(b)).getsCircularShiftedLine();
+	    	String sTwo = ((Index)aFirstList.get(a)).getsCircularShiftedLine();
+	    	
+	        if (sOne.equalsIgnoreCase(sTwo)) {
+	            return -1;
+	        } else {
+	            return 1;
+	        } // returning 0 would merge keys
+	    }
+	}*/
 
 	/**
 	 * @param args
